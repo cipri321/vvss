@@ -11,6 +11,7 @@ import service.Service;
 import validation.NotaValidator;
 import validation.StudentValidator;
 import validation.TemaValidator;
+import validation.ValidationException;
 
 public class TestStudent {
     StudentXMLRepo studentXMLRepo = new StudentXMLRepo("fisiere/testStudentXmlRepo.xml");
@@ -42,6 +43,13 @@ public class TestStudent {
         int len=0;
         for(Student s: serv.getAllStudenti()) {
             len++;
+        }
+        Student stud2 = new Student("id2", "DIFFNAME", -123, "A1@gmail.com");
+        try {
+            serv.addStudent(stud2);
+            assertEquals(1, 2);
+        } catch (ValidationException ve) {
+            assertEquals(1, 1);
         }
         assertEquals(len, 2);
     }
