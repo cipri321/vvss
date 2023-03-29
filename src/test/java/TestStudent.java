@@ -13,6 +13,8 @@ import validation.StudentValidator;
 import validation.TemaValidator;
 import validation.ValidationException;
 
+import javax.swing.*;
+
 public class TestStudent {
     StudentXMLRepo studentXMLRepo = new StudentXMLRepo("fisiere/testStudentXmlRepo.xml");
     StudentValidator studentValidator = new StudentValidator();
@@ -25,6 +27,10 @@ public class TestStudent {
 
     NotaValidator notaValidator = new NotaValidator(studentXMLRepo, temaXMLRepo);
 
+    String defaultName="defaultName";
+    Integer defaultGrupa = 123;
+    String defaultEmail = "a@e.com";
+    String defaultId = "defaultId";
 
 
 
@@ -52,5 +58,101 @@ public class TestStudent {
             assertEquals(1, 1);
         }
         assertEquals(len, 2);
+
+        serv.deleteStudent("100");
+        serv.deleteStudent("id2");
+    }
+
+    public void tryAdd(Student stud) {
+        try {
+            serv.addStudent(stud);
+            serv.deleteStudent(stud.getID());
+            assertEquals(1, 0);
+        }
+        catch (ValidationException ve) {
+            assertEquals(1, 1);
+        }
+    }
+
+    public void checkAdd(Student stud) {
+        serv.addStudent(stud);
+        assertEquals(serv.findStudent(stud.getID()).toString(), stud.toString());
+    }
+    @Test
+    public void testAddStudentIdCheck() {
+//        id should have length greater than 0 and smaller than 30
+
+        Student stud = new Student(null, defaultName, defaultGrupa, defaultEmail);
+        tryAdd(stud);
+
+        stud = new Student("", defaultName, defaultGrupa, defaultEmail);
+        tryAdd(stud);
+
+        stud = new Student("1", defaultName, defaultGrupa, defaultEmail);
+        checkAdd(stud);
+        serv.deleteStudent("1");
+
+        stud = new Student("012345678901234567890123456789", defaultName, defaultGrupa, defaultEmail);
+        checkAdd(stud);
+        serv.deleteStudent("012345678901234567890123456789");
+
+        stud = new Student("0123456789012345678901234567890", defaultName, defaultGrupa, defaultEmail);
+        tryAdd(stud);
+
+        stud = new Student(defaultId, defaultName, defaultGrupa, defaultEmail);
+        checkAdd(stud);
+        serv.deleteStudent(defaultId);
+
+    }
+
+    @Test
+    public void testAddStudentCheckGroup() {
+        Student stud = new Student(defaultId, defaultName, -1, defaultEmail);
+        tryAdd(stud);
+
+        stud = new Student(defaultId, defaultName, 0, defaultEmail);
+        checkAdd(stud);
+        serv.deleteStudent(defaultId);
+
+        stud = new Student(defaultId, defaultName, 999, defaultEmail);
+        checkAdd(stud);
+        serv.deleteStudent(defaultId);
+
+        stud = new Student(defaultId,defaultName,1000, defaultEmail);
+        tryAdd(stud);
+    }
+
+    @Test
+    public void testAddStudentCheckName() {
+        Student stud = new Student(defaultId,null, defaultGrupa, defaultEmail);
+        tryAdd(stud);
+
+        stud = new Student(defaultId,"", defaultGrupa, defaultEmail);
+        tryAdd(stud);
+
+        stud = new Student(defaultId, "a1", defaultGrupa, defaultEmail);
+        tryAdd(stud);
+
+        stud = new Student(defaultId, "a", defaultGrupa, defaultEmail);
+        checkAdd(stud);
+        serv.deleteStudent(defaultId);
+
+        stud = new Student(defaultId, "qwertyuioplkjhgfdsazxcvbnmlkjh", defaultGrupa, defaultEmail);
+        checkAdd(stud);
+        serv.deleteStudent(defaultId);
+
+        stud = new Student(defaultId, "qwertyuioplkjhgfdsazxcvbnmlokjh", defaultGrupa, defaultEmail);
+        tryAdd(stud);
+    }
+
+    @Test
+    public void testAddStudentCheckEmail() {
+        Student stud = new Student(defaultId, defaultName, defaultGrupa, "a@e.com");
+        checkAdd(stud);
+        serv.deleteStudent(defaultId);
+
+        stud = new Student(defaultId, defaultName, defaultGrupa, "notgood");
+        tryAdd(stud);
+
     }
 }
